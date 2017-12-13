@@ -3,18 +3,24 @@ import datetime as dt
 import random
 import gensim as gs
 
-def ValidWord(word):
+def ValidWord1(word):
     if not ('\u4e00' <= word[0] <= '\u9fff' or '\u4e00' <= word[-1] <= '\u9fff') and \
        not ('\u0041' <= word[0] <= '\u005a' or '\u0041' <= word[-1] <= '\u005a') and \
        not ('\u0061' <= word[0] <= '\u007a' or '\u0061' <= word[-1] <= '\u007a'): # 头尾都不是汉字或字母
         return False
     return True
 
+def ValidWord(word):
+    if len(word) <= 1:
+        return False
+    return ValidWord1(word)
 
-mc = pm.MongoClient('mongodb://gongcq:gcq@localhost:27017/text')
+#
+# mc = pm.MongoClient('mongodb://gongcq:gcq@localhost:27017/text')
+mc = pm.MongoClient('mongodb://gongcq:gcq@192.168.7.83:27017/text')
 db = mc['text']
 
-days = 10
+days = 33
 docs = db.section.find({'time': {'$gte': dt.datetime.now() - dt.timedelta(days=days)}})
 lineBreak = '\n'
 paraList = []
@@ -31,8 +37,12 @@ for doc in docs:
 
 # word to id
 wordDict = gs.corpora.Dictionary(docParseList)
+file = open('wordDict.txt', 'w', encoding='utf-8')
 for token, id in wordDict.token2id.items():
     wordDict.id2token[id] = token
+    file.write(str(id) + ',' + str(token) + '\n')
+file.flush()
+file.close()
 corpus = [wordDict.doc2bow(doc) for doc in docParseList]
 tfIdf = gs.models.TfidfModel(corpus)
 tiList = []
@@ -48,7 +58,7 @@ for c in range(len(corpus)):
     tiList.append(tiSort)
 
 # filter words which have low tf-idf
-quant = 0.8
+quant = 0.3
 docFilterParseList = []
 for d in range(len(docList)):
     tiSort = tiList[d]
@@ -81,10 +91,14 @@ for docFilterParse in docFilterParseList:
             maxId += 1
         idDoc.append(wordId)
     idDocList.append(idDoc)
+file1 = open('wordIdDict.txt', 'w', encoding='utf-8')
+for word, id in wordIdDict.items():
+    file1.write(str(id) + ',' + word + '\n')
+file1.flush()
+file1.close()
 
-
-interval = 3
-numSteps = 12
+interval = 2
+numSteps = 5
 batchSize = 10
 samples = []
 for p in range(len(idDocList)):
