@@ -95,18 +95,20 @@ class LangModel:
 def Train(batchs, vocabSize, batchSize, numSteps):
     model = LangModel(vocabSize, True, batchSize, numSteps)
     totalCost = 0
-    for b in range(len(batchs)):
-        batch = batchs[b]
-        input = batch[0]
-        objVal = batch[1]
-        cost = model.Train(input, objVal)
-        totalCost += cost
-        print(str(dt.datetime.now()))
-        print('train batchSeq=' + str(b) + '/' + str(len(batchs)) + ', perplex=' + str(np.exp(cost)) + ', cost=' + str(cost))
-        if b % 500 == 0:
-            path = os.path.join('.', 'modelFile', 'model' + str(b) + '.csv')
-            model.SaveEmbTable(path)
-            print('=== success to save model in ' + path)
+    for epoch in range(5):
+        for b in range(len(batchs)):
+            batch = batchs[b]
+            input = batch[0]
+            objVal = batch[1]
+            cost = model.Train(input, objVal)
+            totalCost += cost
+            print(str(dt.datetime.now()))
+            print('epoch=' + str(epoch) + ', train batchSeq=' + str(b) + '/' + str(len(batchs)) +
+                  ', perplex=' + str(np.exp(cost)) + ', cost=' + str(cost))
+                  
+        path = os.path.join('.', 'modelFile', 'model' + str(epoch) + '_' + str(len(batchs)) + '.csv')
+        model.SaveEmbTable(path)
+        print('=== success to save model in ' + path)
 
 
     print(np.exp(totalCost / len(batchs)))
@@ -134,7 +136,7 @@ def Test(batchs, vocabSize, batchSize, numSteps):
 from sample1 import batchs, vocabSize, batchSize, numSteps
 print('success to get batchs')
 
-divide = int(len(batchs) * 0.7)
+divide = int(len(batchs) * 0.9)
 trainBatch = batchs[0 : divide]
 testBatch = batchs[divide : ]
 

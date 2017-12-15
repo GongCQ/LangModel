@@ -16,11 +16,11 @@ def ValidWord(word):
     return ValidWord1(word)
 
 #
-# mc = pm.MongoClient('mongodb://gongcq:gcq@localhost:27017/text')
-mc = pm.MongoClient('mongodb://gongcq:gcq@192.168.7.83:27017/text')
+mc = pm.MongoClient('mongodb://gongcq:gcq@localhost:27017/text')
+# mc = pm.MongoClient('mongodb://gongcq:gcq@192.168.7.83:27017/text')
 db = mc['text']
 
-days = 33
+days = 30
 docs = db.section.find({'time': {'$gte': dt.datetime.now() - dt.timedelta(days=days)}})
 lineBreak = '\n'
 paraList = []
@@ -97,8 +97,8 @@ for word, id in wordIdDict.items():
 file1.flush()
 file1.close()
 
-interval = 2
-numSteps = 5
+interval = 3
+numSteps = 7
 batchSize = 10
 samples = []
 for p in range(len(idDocList)):
